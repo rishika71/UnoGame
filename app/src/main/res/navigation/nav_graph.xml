@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/createNewAccountFragment"
+        android:name="com.example.unogame.CreateNewAccountFragment"
+        android:label="fragment_create_new_account"
+        tools:layout="@layout/fragment_create_new_account" >
+        <action
+            android:id="@+id/action_createNewAccountFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_createNewAccountFragment_to_gameScreenFragment"
+            app:destination="@id/gameScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.unogame.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_createNewAccountFragment"
+            app:destination="@id/createNewAccountFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_gameScreenFragment"
+            app:destination="@id/gameScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.example.unogame.ForgotPasswordFragment"
+        android:label="fragment_forgot_password"
+        tools:layout="@layout/fragment_forgot_password" >
+        <action
+            android:id="@+id/action_forgotPasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameScreenFragment"
+        android:name="com.example.unogame.GameScreenFragment"
+        android:label="GameScreenFragment" >
+        <action
+            android:id="@+id/action_gameScreenFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_gameScreenFragment_to_userProfileFragment"
+            app:destination="@id/userProfileFragment" />
+        <action
+            android:id="@+id/action_gameScreenFragment_to_usersFragment"
+            app:destination="@id/usersFragment" />
+        <action
+            android:id="@+id/action_gameScreenFragment_to_gameRequestFragment"
+            app:destination="@id/gameRequestFragment" />
+        <action
+            android:id="@+id/action_gameScreenFragment_to_gameRoomFragment"
+            app:destination="@id/gameRoomFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="com.example.unogame.UserProfileFragment"
+        android:label="fragment_user_profile"
+        tools:layout="@layout/fragment_user_profile" >
+        <action
+            android:id="@+id/action_userProfileFragment_to_gameScreenFragment"
+            app:destination="@id/gameScreenFragment" />
+        <action
+            android:id="@+id/action_userProfileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.unogame.EditProfileFragment"
+        android:label="fragment_edit_profile"
+        tools:layout="@layout/fragment_edit_profile" >
+        <action
+            android:id="@+id/action_editProfileFragment_to_userProfileFragment"
+            app:destination="@id/userProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/viewUserFragment"
+        android:name="com.example.unogame.ViewUserFragment"
+        android:label="fragment_view_user"
+        tools:layout="@layout/fragment_view_user" >
+        <action
+            android:id="@+id/action_viewUserFragment_to_gameScreenFragment"
+            app:destination="@id/gameScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="com.example.unogame.UsersFragment"
+        android:label="fragment_users"
+        tools:layout="@layout/fragment_users" >
+        <action
+            android:id="@+id/action_usersFragment_to_viewUserFragment"
+            app:destination="@id/viewUserFragment" />
+        <action
+            android:id="@+id/action_usersFragment_to_gameScreenFragment"
+            app:destination="@id/gameScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameRoomFragment"
+        android:name="com.example.unogame.GameRoomFragment"
+        android:label="game_room_fragment"
+        tools:layout="@layout/game_room_fragment" >
+        <action
+            android:id="@+id/action_gameRoomFragment_to_gameScreenFragment"
+            app:destination="@id/gameScreenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameRequestFragment"
+        android:name="com.example.unogame.GameRequestFragment"
+        android:label="fragment_game_request"
+        tools:layout="@layout/fragment_game_request" >
+        <action
+            android:id="@+id/action_gameRequestFragment_to_gameRoomFragment"
+            app:destination="@id/gameRoomFragment" />
+        <action
+            android:id="@+id/action_gameRequestFragment_to_gameScreenFragment"
+            app:destination="@id/gameScreenFragment" />
+    </fragment>
+</navigation>

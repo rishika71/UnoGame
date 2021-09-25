@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">Uno Game</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login">LOGIN</string>
+    <string name="info">Info</string>
+    <string name="okay">Okay</string>
+    <string name="loading">Loading...</string>
+    <string name="cancel">cancel</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="createAccount">Create New Account</string>
+    <string name="forgotPassword">Forgot Password</string>
+    <string name="enterEmail">Please Enter Email</string>
+    <string name="enterPassword">Please Enter Password</string>
+    <string name="enterFirstName">Please Enter First Name</string>
+    <string name="enterLastName">Please Enter Last Name</string>
+    <string name="enterCity">Please Enter City</string>
+    <string name="chooseGender">Please Specify Gender</string>
+    <string name="errorMessage">Error !!!</string>
+    <string name="ok">OK</string>
+    <string name="firstName">Firstname</string>
+    <string name="lastName">Lastname</string>
+    <string name="city">City</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="gender">Gender</string>
+    <string name="register">register</string>
+    <string name="passwordResetEmail">Reset password link was sent to your email.</string>
+    <string name="resetPassword">Reset Password</string>
+    <string name="users">Users</string>
+    <string name="profile">Profile</string>
+    <string name="logout">Logout</string>
+    <string name="userProfile">User Profile</string>
+    <string name="imagePick">Choose Image From:</string>
+    <string name="edit">Edit</string>
+    <string name="update">update</string>
+    <string name="requestRide">Request Ride</string>
+    <string name="api_key">AIzaSyBerQrC4OgEY2u-BR4daPzq5ke4ktgjx6Q</string>
+
+    <string name="unogame">Uno Game</string>
+    <string name="friends">Friends</string>
+
+
+</resources>

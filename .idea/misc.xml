@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="app/src/main/res/drawable/close.xml" value="0.20625" />
+        <entry key="app/src/main/res/drawable/unocard.xml" value="0.20625" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/content_main.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/fragment_create_new_account.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/fragment_edit_profile.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/fragment_game_request.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/fragment_game_screen.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/fragment_login.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/fragment_user_profile.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_users.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/fragment_view_user.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/game_room_fragment.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/image_list.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/layout_cardslist.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/users_layout.xml" value="0.19010416666666666" />
+        <entry key="app/src/main/res/layout/viewer_layout.xml" value="0.15625" />
+        <entry key="app/src/main/res/menu/menu_main.xml" value="0.25" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_15" project-jdk-name="16" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
