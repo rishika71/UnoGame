@@ -195,7 +195,6 @@ public class GameScreenFragment extends Fragment {
 
                                                 ArrayList<String> usedCards = new ArrayList<>();
 
-
                                                 db.collection(Utils.DB_GAME)
                                                         .document(doc.getId())
                                                         .update("status", "started", "player2",new Player(currentUser.getId(), currentUser.getFirstname() + " " + currentUser.getLastname())

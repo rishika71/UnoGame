@@ -1,5 +1,7 @@
 package com.example.unogame;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +15,7 @@ import com.example.unogame.models.Card;
 import com.example.unogame.models.Player;
 import com.example.unogame.models.User;
 import com.example.unogame.models.Utils;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -21,6 +24,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,16 +42,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     String documentId;
     String player;
     String topCard;
+    String playerType;
+    ArrayList<String> tableDeck;
 
     final private String TAG = "demo";
 
     ListenerRegistration lr;
 
-    public RecyclerViewAdapter(ArrayList<String> cardsList, String documentId, String player, String topCard) {
+    public RecyclerViewAdapter(ArrayList<String> cardsList, String documentId, String player, String topCard, String playerType, ArrayList<String> tableDeck) {
         this.cardsList = cardsList;
         this.documentId = documentId;
         this.player = player;
         this.topCard = topCard;
+        this.playerType = playerType;
+        this.tableDeck = tableDeck;
     }
 
     @NonNull
@@ -83,13 +91,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             cardColor = Color.YELLOW;
         else if(color.equals("R"))
             cardColor = Color.RED;
-//        else if(color.equals("W"))
-//        {
-//            facevalue = arr[1] + arr[2];//for wild cards
-//        }
+
 
         holder.binding.playerCard.setCardBackgroundColor(cardColor);
-        holder.binding.textviewId.setText(facevalue);
+        if(color.equals("W"))
+            holder.binding.textviewId.setText(arr[1] + arr[2]);  //for wild card draw4
+        else
+            holder.binding.textviewId.setText(facevalue);
 
       holder.binding.playerCard.setOnClickListener(new View.OnClickListener() {
           @Override
@@ -102,13 +110,121 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
               String topCardColor = topCardArr[0];
               String topCardFaceValue = topCardArr[1];
 
-              if(color.equals(topCardColor) || facevalue.equals(topCardFaceValue)){
+              if(card.equals("Wd4")){
+
+
+                  //pop up with color and set that color;
+
+                  AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                  builder.setTitle("Choose color");
+
+                  String[] colorList = {"RED", "GREEN", "BLUE", "YELLOW"};
+                  builder.setItems(colorList, new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialog, int which) {
+
+                          switch (which) {
+                              case 0: topCard = "Rd4"; //RED
+                              case 1: topCard = "Gd4"; // GREEN
+                              case 2: topCard = "Bd4"; // BLUE
+                              case 3: topCard = "Yd4"; // YELLOW
+                          }
+                          db.collection(Utils.DB_GAME)
+                                  .document(documentId)
+                                  .update("topCard", topCard);
+
+                      }
+                  });
+
+                  AlertDialog dialog = builder.create();
+                  dialog.show();
+
+                  String type;
+
+                  ArrayList<String> otherPlayerDeck = new ArrayList<>();
+                  for(int k = 0; k<4 ;k++) {
+                      otherPlayerDeck.add(tableDeck.get(k));
+                      tableDeck.remove(k);
+                  }
+
+                  if(playerType.equals("player1")) {
+                      playerType = "player1";
+                      type = "player2Deck";
+                  }
+                  else {
+                      playerType = "player2";
+                      type = "player1Deck";
+                  }
+
+                   for(int i = 0; i<otherPlayerDeck.size(); i++){
+
+                      db.collection(Utils.DB_GAME)
+                              .document(documentId)
+                              .update(type, FieldValue.arrayUnion(otherPlayerDeck.get(i))
+                              );
+                  }
+
+                  db.collection(Utils.DB_GAME)
+                          .document(documentId)
+                          .update("usedCards", FieldValue.arrayUnion(card)
+                                  ,player, FieldValue.arrayRemove(card)
+                                  , "turn", playerType
+                                  ,"tableDeck", tableDeck
+                          );
+
+              }else if(color.equals(topCardColor) || facevalue.equals(topCardFaceValue)){
+
                   topCard = card;
+
+                  if(facevalue.equals("d") || facevalue.equals("S"))  //Turn will be skipped on d4 or skip card
+                  {
+                      if(facevalue.equals("d")){
+
+                          String type;
+
+                          ArrayList<String> otherPlayerDeck = new ArrayList<>();
+                          for(int k = 0; k<4 ;k++) {
+                              otherPlayerDeck.add(tableDeck.get(k));
+                              tableDeck.remove(k);
+                          }
+
+                          if(playerType.equals("player1"))
+                              type = "player2Deck";
+                          else
+                              type = "player1Deck";
+
+                          for(int i = 0; i<otherPlayerDeck.size(); i++){
+
+                              db.collection(Utils.DB_GAME)
+                                      .document(documentId)
+                                      .update(type, FieldValue.arrayUnion(otherPlayerDeck.get(i))
+                                      );
+                          }
+
+                      }
+
+                      if(playerType.equals("player1"))
+                          playerType = "player1";
+                      else
+                          playerType = "player2";
+                  }else{
+
+                      if(playerType.equals("player1"))
+                          playerType = "player2";
+                      else
+                          playerType = "player1";
+                  }
+
+
+
                   db.collection(Utils.DB_GAME)
                           .document(documentId)
                           .update(  "topCard", topCard
                                   ,"usedCards", FieldValue.arrayUnion(card)
                                   ,player, FieldValue.arrayRemove(card)
+                                  , "turn", playerType
+                                  ,"tableDeck", tableDeck
+
                           );
               }else{
                   Toast.makeText(view.getContext(), "Choose another card!!!", Toast.LENGTH_SHORT).show();

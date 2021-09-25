@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.unogame.databinding.FragmentUsersBinding;
@@ -126,10 +127,23 @@ public class GameRoomFragment extends Fragment {
                 Map<String, Object> documentMap = value.getData();
 
                 String player;
-                if(currentUser.getId().equals(game.getPlayer1().getId()))
+                String playerType;
+                if(currentUser.getId().equals(game.getPlayer1().getId())) {
                     player = "player1Deck";
-                else
+                    playerType = "player1";
+                } else {
                     player = "player2Deck";
+                    playerType = "player2";
+                }
+
+
+                /* To disable/enable layout on the basis of turn */
+                if( playerType.equals(documentMap.get("turn"))){
+                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                }else
+                {
+                    getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                }
 
 
                 String[] arr = documentMap.get("topCard").toString().split(""); //arr first element is card color and second is card faceValue
@@ -149,9 +163,11 @@ public class GameRoomFragment extends Fragment {
                 binding.cardPlayed.setCardBackgroundColor(color);
                 binding.topCard.setText(arr[1]);
 
+                ArrayList<String> tableDeck = (ArrayList<String>) documentMap.get("tableDeck");
+
                 ArrayList<String> playerDeck = (ArrayList<String>) documentMap.get(player);
                 binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                binding.recyclerView.setAdapter(new RecyclerViewAdapter(playerDeck, value.getId(), player, documentMap.get("topCard").toString() ));
+                binding.recyclerView.setAdapter(new RecyclerViewAdapter(playerDeck, value.getId(), player, documentMap.get("topCard").toString(), playerType, tableDeck ));
 
             }
         });
