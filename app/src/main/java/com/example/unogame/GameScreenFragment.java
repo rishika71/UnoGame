@@ -107,6 +107,7 @@ public class GameScreenFragment extends Fragment {
         data.put("status", "created");
         data.put("player1", new Player(currentUser.getId(), currentUser.getFirstname() + " " + currentUser.getLastname() ));
         data.put("createdAt", new Date());
+        data.put("turn", "player1");
 
         db.collection(Utils.DB_GAME)
                 .document()
@@ -187,16 +188,16 @@ public class GameScreenFragment extends Fragment {
                                                 }
 
                                                 ArrayList<String> usedCards = new ArrayList<>();
+                                                usedCards.add(topCard);
 
                                                 db.collection(Utils.DB_GAME)
                                                         .document(doc.getId())
                                                         .update("status", "started", "player2",new Player(currentUser.getId(), currentUser.getFirstname() + " " + currentUser.getLastname())
                                                                 , "topCard", topCard
-                                                                , "turn" , "player1"
                                                                 , "tableDeck" , shuffledDeck
                                                                 , "player1Deck" , player1Deck
                                                                 , "player2Deck" , player2Deck
-                                                                , "usedCards" , usedCards.add(topCard)
+                                                                , "usedCards" , usedCards
                                                                     );
 
                                                 dialogInterface.dismiss();

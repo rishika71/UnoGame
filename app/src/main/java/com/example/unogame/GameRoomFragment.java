@@ -2,6 +2,7 @@ package com.example.unogame;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Log;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.unogame.databinding.GameRoomFragmentBinding;
 import com.example.unogame.models.Game;
+import com.example.unogame.models.Player;
 import com.example.unogame.models.User;
 import com.example.unogame.models.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -47,7 +50,7 @@ public class GameRoomFragment extends Fragment {
     GameRoomFragmentBinding binding;
 
     IGameRoomScreen mGameRoomScreen;
-    
+
     final private String TAG = "demo";
 
     NavController navController;
@@ -93,6 +96,8 @@ public class GameRoomFragment extends Fragment {
         binding = GameRoomFragmentBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
+        navController = Navigation.findNavController(getActivity(), R.id.fragmentContainerView2);
+
         binding.player1TexViewId.setText(game.getPlayer1().getName());
         binding.player2TexViewId.setText(game.getPlayer2().getName());
 
@@ -118,11 +123,21 @@ public class GameRoomFragment extends Fragment {
                 Map<String, Object> documentMap = task.getResult().getData();
                 String documnetId = task.getResult().getId();
 
-                String playerType;
-                if(currentUser.getId().equals(game.getPlayer1().getId()))
-                    playerType = "player1";
+                String currentPlayer;
+                String playerDeck;
+                String nextPlayerTurn;
+
+                if(currentUser.getId().equals(game.getPlayer1().getId())) {
+                    currentPlayer = "player1";
+                    playerDeck = "player1Deck";
+                    nextPlayerTurn = "player2";
+                }
                else
-                    playerType = "player2";
+                {
+                    currentPlayer = "player2";
+                    playerDeck = "player2Deck";
+                    nextPlayerTurn = "player1";
+                }
 
                 ArrayList<String> tableDeck = (ArrayList<String>) documentMap.get("tableDeck");
 
@@ -160,39 +175,39 @@ public class GameRoomFragment extends Fragment {
                                 );
                     }else{
                        // Log.d(TAG, "onEvent: Not Empty DECK");
-                        for(int i = 0; i< tableDeck.size(); i++){
-                            String pickedCard = tableDeck.get(i);
-                            String[] array = pickedCard.split("");
-                            if(array[1].equals("S") || array[1].equals("d")){
+                        String pickedCard = tableDeck.get(0);
+                        String[] array = pickedCard.split(""); //arr first element is card color and second is card faceValue
 
-                                continue;  // TODOimplement when card is S or D
+                        String pickedCard_color = array[0];
+                        String pickedCard_facevalue = array[1];
 
-                            }else{
+                        if(pickedCard_color.equals(topcard_color) || pickedCard_facevalue.equals(topcard_facevalue) ){
 
-                                if(array[0].equals(topcard_color) || array[1].equals(topcard_facevalue) ){
-                                    topCard = pickedCard;
-                                    break;
-                                }
-                                else{
-                                    continue;
-                                    //TODOif the card is not matching in the deck?
-
-                                }
+                            if(pickedCard_facevalue.equals("S")) {
+                                nextPlayerTurn = currentPlayer;
                             }
 
-                        }
-                        if(playerType.equals("player1"))
-                            playerType = "player2";
-                        else
-                            playerType = "player1";
 
-                        db.collection(Utils.DB_GAME)
-                                .document(documnetId)
-                                .update("topCard", topCard
-                                        ,"turn", playerType
-                                        , "tableDeck", FieldValue.arrayRemove(topCard)
-                                        ,"usedCards", FieldValue.arrayUnion(topCard)
-                                );
+                            db.collection(Utils.DB_GAME)
+                                    .document(documnetId)
+                                    .update("topCard", topCard
+                                            ,"turn", nextPlayerTurn
+                                            , "tableDeck", FieldValue.arrayRemove(topCard)
+                                            ,"usedCards", FieldValue.arrayUnion(topCard)
+                                    );
+
+                        }else{
+
+                            // add picked card in player's deck
+                            db.collection(Utils.DB_GAME)
+                                    .document(documnetId)
+                                    .update("turn", nextPlayerTurn
+                                            , "tableDeck", FieldValue.arrayRemove(topCard)
+                                            ,playerDeck, FieldValue.arrayUnion(pickedCard)
+                                    );
+
+                        }
+
                     }
 
             }
@@ -216,54 +231,85 @@ public class GameRoomFragment extends Fragment {
 
                 Map<String, Object> documentMap = value.getData();
 
-                String player;
-                String playerType;
-                if(currentUser.getId().equals(game.getPlayer1().getId())) {
-                    player = "player1Deck";
-                    playerType = "player1";
-                } else {
-                    player = "player2Deck";
-                    playerType = "player2";
+               if (documentMap.get("status").toString().equals("finished")){
+                    // Game status is finished
+                    navController.navigate(R.id.action_gameRoomFragment_to_gameScreenFragment);
                 }
 
+               ArrayList<String> player1Deck = (ArrayList<String>) documentMap.get("player1Deck");
+                ArrayList<String> player2Deck = (ArrayList<String>) documentMap.get("player2Deck");
 
-                /* To disable/enable layout on the basis of turn */
-                if( playerType.equals(documentMap.get("turn"))){
-                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                }else
-                {
-                    getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                }
+               if(player1Deck.isEmpty()){
 
-                ArrayList<String> tableDeck = (ArrayList<String>) documentMap.get("tableDeck");
+                   db.collection(Utils.DB_GAME)
+                           .document(value.getId())
+                           .update("winner", "player1"
+                                   ,"status", "finished"
+                           );
 
-                ArrayList<String> playerDeck = (ArrayList<String>) documentMap.get(player);
+               }else if(player2Deck.isEmpty()){
 
-                ArrayList<String> usedCards = (ArrayList<String>) documentMap.get("usedCards");
+                   db.collection(Utils.DB_GAME)
+                           .document(value.getId())
+                           .update("winner", "player2"
+                                   ,"status", "finished"
+                           );
+               } else{
+                    /*
+                        if non of the players deck is empty
+                     */
 
-                String topCard = documentMap.get("topCard").toString();
-                String[] arr = topCard.split(""); //arr first element is card color and second is card faceValue
+                   String player;
+                   String playerType;
+                   if(currentUser.getId().equals(game.getPlayer1().getId())) {
+                       player = "player1Deck";
+                       playerType = "player1";
+                   } else {
+                       player = "player2Deck";
+                       playerType = "player2";
+                   }
 
-                String topcard_color = arr[0];
-                String topcard_facevalue = arr[1];
+//
+//                   /* To disable/enable layout on the basis of turn */
+//                   if( playerType.equals(documentMap.get("turn"))){
+//                       getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//                   }else
+//                   {
+//                       getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//                   }
 
-                int color = Color.WHITE;
-                if(topcard_color.equals("B"))
-                    color = Color.BLUE;
-                else if(topcard_color.equals("G"))
-                    color = Color.GREEN;
-                else if(topcard_color.equals("Y"))
-                    color = Color.YELLOW;
-                else if(topcard_color.equals("R"))
-                    color = Color.RED;
-                else if(topcard_color.equals("W"))
-                    arr[1] = arr[1]+arr[2];  //for wild cards
+                   ArrayList<String> tableDeck = (ArrayList<String>) documentMap.get("tableDeck");
 
-                binding.cardPlayed.setCardBackgroundColor(color);
-                binding.topCard.setText(arr[1]);
+                   ArrayList<String> playerDeck = (ArrayList<String>) documentMap.get(player);
 
-                binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                binding.recyclerView.setAdapter(new RecyclerViewAdapter(playerDeck, value.getId(), player, topCard, playerType, tableDeck ));
+
+
+                   String topCard = documentMap.get("topCard").toString();
+                   String[] arr = topCard.split(""); //arr first element is card color and second is card faceValue
+
+                   String topcard_color = arr[0];
+
+                   int color = Color.WHITE;
+                   if(topcard_color.equals("B"))
+                       color = Color.BLUE;
+                   else if(topcard_color.equals("G"))
+                       color = Color.GREEN;
+                   else if(topcard_color.equals("Y"))
+                       color = Color.YELLOW;
+                   else if(topcard_color.equals("R"))
+                       color = Color.RED;
+                   else if(topcard_color.equals("W"))
+                       arr[1] = arr[1]+arr[2];  //for wild cards
+
+                   binding.cardPlayed.setCardBackgroundColor(color);
+                   binding.topCard.setText(arr[1]);
+
+                   binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                   binding.recyclerView.setAdapter(new RecyclerViewAdapter(playerDeck, value.getId(), player, topCard, playerType, tableDeck ));
+
+
+               }
+
 
             }
         });
