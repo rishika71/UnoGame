@@ -30,6 +30,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:text="player 1 "
+        android:fontFamily="sans-serif-medium"
         android:textSize="14sp"
         app:layout_constraintStart_toEndOf="@+id/player1Image"
         app:layout_constraintTop_toTopOf="parent" />
@@ -52,6 +53,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="32dp"
         android:text="player2"
+        android:fontFamily="sans-serif-medium"
         android:textSize="14sp"
         app:layout_constraintStart_toEndOf="@+id/textView6"
         app:layout_constraintTop_toTopOf="parent" />
@@ -61,7 +63,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="100dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/deck" />
 
@@ -88,7 +90,8 @@
         android:clickable="true"
         android:src="@drawable/uno_deck"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/player1Image" />
+        app:layout_constraintTop_toBottomOf="@+id/player1Image"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardPlayed"
@@ -109,5 +112,34 @@
 
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/skipTurn"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        app:icon="@drawable/skip_image"
+        app:iconSize="35dp"
+        app:iconPadding="10dp"
+        android:hint="Skip Turn"
+        android:tooltipText="Skip Turn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Rounded" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/exit"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:hint="Skip Turn"
+        android:tooltipText="Skip Turn"
+        app:icon="@drawable/close"
+        app:iconPadding="10dp"
+        app:iconSize="35dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Rounded" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
