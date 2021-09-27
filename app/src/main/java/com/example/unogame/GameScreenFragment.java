@@ -134,7 +134,7 @@ public class GameScreenFragment extends Fragment {
 
         HashMap<String, Object > data = new HashMap<>();
         data.put("status", "created");
-        data.put("player1", new Player(currentUser.getId(), currentUser.getFirstname() + " " + currentUser.getLastname() ));
+        data.put("player1", new Player(currentUser.getId(), currentUser.getFirstname() + " " + currentUser.getLastname(), currentUser.getPhotoref() ));
         data.put("createdAt", new Date());
         data.put("turn", "player1");
 
@@ -221,7 +221,7 @@ public class GameScreenFragment extends Fragment {
 
                                                 db.collection(Utils.DB_GAME)
                                                         .document(doc.getId())
-                                                        .update("status", "started", "player2",new Player(currentUser.getId(), currentUser.getFirstname() + " " + currentUser.getLastname())
+                                                        .update("status", "started", "player2",new Player(currentUser.getId(), currentUser.getFirstname() + " " + currentUser.getLastname(), currentUser.getPhotoref())
                                                                 , "topCard", topCard
                                                                 , "tableDeck" , shuffledDeck
                                                                 , "player1Deck" , player1Deck
@@ -298,7 +298,7 @@ public class GameScreenFragment extends Fragment {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-         
+
             case R.id.action_friends:
                 navController.navigate(R.id.action_gameScreenFragment_to_usersFragment);
                 return true;

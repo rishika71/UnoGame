@@ -37,6 +37,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,6 +101,30 @@ public class GameRoomFragment extends Fragment {
 
         binding.player1TexViewId.setText(game.getPlayer1().getName());
         binding.player2TexViewId.setText(game.getPlayer2().getName());
+
+        if (game.getPlayer1().getPhotoref() != null) {
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(game.getPlayer1().getId()).child(game.getPlayer1().getPhotoref());
+            GlideApp.with(view)
+                    .load(storageReference)
+                    .into(binding.player1Image);
+        } else {
+            GlideApp.with(view)
+                    .load(R.drawable.profile_image)
+                    .into(binding.player1Image);
+        }
+
+        if (game.getPlayer2().getPhotoref() != null) {
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(game.getPlayer2().getId()).child(game.getPlayer2().getPhotoref());
+            GlideApp.with(view)
+                    .load(storageReference)
+                    .into(binding.player2Image);
+        } else {
+            GlideApp.with(view)
+                    .load(R.drawable.profile_image)
+                    .into(binding.player2Image);
+        }
+
+
 
         binding.deck.setOnClickListener(new View.OnClickListener() {
             @Override

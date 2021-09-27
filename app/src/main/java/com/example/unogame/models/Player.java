@@ -4,14 +4,23 @@ import java.io.Serializable;
 
 public class Player implements Serializable {
 
-    String id, name;
+    String id, name, photoref;
 
     public Player(){
 
     }
-    public Player(String id, String name) {
+    public Player(String id, String name, String photoref) {
         this.id = id;
         this.name = name;
+        this.photoref = photoref;
+    }
+
+    public String getPhotoref() {
+        return photoref;
+    }
+
+    public void setPhotoref(String photoref) {
+        this.photoref = photoref;
     }
 
     public String getId() {
@@ -35,6 +44,7 @@ public class Player implements Serializable {
         return "Player{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", photoref='" + photoref + '\'' +
                 '}';
     }
 }
