@@ -45,7 +45,6 @@ import java.util.Map;
 
 public class GameRoomFragment extends Fragment {
 
-    private GameRoomViewModel mViewModel;
 
     GameRoomFragmentBinding binding;
 
@@ -89,7 +88,7 @@ public class GameRoomFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        Log.d(TAG, "onCreateView: gameDocumentId " + gameDocumentId);
+
         currentUser = mGameRoomScreen.getUser();
         getActivity().setTitle("Game Room");
 
@@ -105,6 +104,7 @@ public class GameRoomFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
+                Toast.makeText(getContext(),"A new card has been picked from the deck", Toast.LENGTH_SHORT).show();
                 pickCardFromDeck();
             }
         });
@@ -121,7 +121,7 @@ public class GameRoomFragment extends Fragment {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
                 Map<String, Object> documentMap = task.getResult().getData();
-                String documnetId = task.getResult().getId();
+                String documentId = task.getResult().getId();
 
                 String currentPlayer;
                 String playerDeck;
@@ -151,7 +151,6 @@ public class GameRoomFragment extends Fragment {
                 String topcard_color = arr[0];
                 String topcard_facevalue = arr[1];
 
-              // Log.d(TAG, "onEvent: Picking Card From the Deck ");
 
                   /* table deck is empty then usedCards should become table deck
                    not empty then check it so that it should match the top card
@@ -162,14 +161,14 @@ public class GameRoomFragment extends Fragment {
                         Collections.shuffle(usedCards);
 
                         for(int j = 0; j<usedCards.size(); j++){
-                            if(usedCards.get(j).equals("Rd4") || usedCards.get(j).equals("Bd4") || usedCards.get(j).equals("Gd4") || usedCards.get(j).equals("Yd4"))
-                                newTableDeck.add("Wd4");
+                            if(usedCards.get(j).equals("R+4") || usedCards.get(j).equals("B+4") || usedCards.get(j).equals("G+4") || usedCards.get(j).equals("Y+4"))
+                                newTableDeck.add("W+4");
                             else
                                 newTableDeck.add(usedCards.get(j));
                         }
 
                         db.collection(Utils.DB_GAME)
-                                .document(documnetId)
+                                .document(documentId)
                                 .update("tableDeck", newTableDeck
                                         ,"usedCards", new ArrayList<String>()
                                 );
@@ -178,19 +177,16 @@ public class GameRoomFragment extends Fragment {
                         String pickedCard = tableDeck.get(0);
                         String[] array = pickedCard.split(""); //arr first element is card color and second is card faceValue
 
-                        String pickedCard_color = array[0];
-                        String pickedCard_facevalue = array[1];
+                        if(array[0].equals(topcard_color) || array[1].equals(topcard_facevalue) ){
 
-                        if(pickedCard_color.equals(topcard_color) || pickedCard_facevalue.equals(topcard_facevalue) ){
-
-                            if(pickedCard_facevalue.equals("S")) {
+                            if(array[1].equals("S")) {
                                 nextPlayerTurn = currentPlayer;
                             }
 
 
                             db.collection(Utils.DB_GAME)
-                                    .document(documnetId)
-                                    .update("topCard", topCard
+                                    .document(documentId)
+                                    .update("topCard", pickedCard
                                             ,"turn", nextPlayerTurn
                                             , "tableDeck", FieldValue.arrayRemove(topCard)
                                             ,"usedCards", FieldValue.arrayUnion(topCard)
@@ -200,7 +196,7 @@ public class GameRoomFragment extends Fragment {
 
                             // add picked card in player's deck
                             db.collection(Utils.DB_GAME)
-                                    .document(documnetId)
+                                    .document(documentId)
                                     .update("turn", nextPlayerTurn
                                             , "tableDeck", FieldValue.arrayRemove(topCard)
                                             ,playerDeck, FieldValue.arrayUnion(pickedCard)
@@ -232,26 +228,27 @@ public class GameRoomFragment extends Fragment {
                 Map<String, Object> documentMap = value.getData();
 
                if (documentMap.get("status").toString().equals("finished")){
-                    // Game status is finished
+                    // Game status is finished/End Game
                     navController.navigate(R.id.action_gameRoomFragment_to_gameScreenFragment);
                 }
 
-               ArrayList<String> player1Deck = (ArrayList<String>) documentMap.get("player1Deck");
-                ArrayList<String> player2Deck = (ArrayList<String>) documentMap.get("player2Deck");
+               if(game.getPlayer1Deck().isEmpty()){
 
-               if(player1Deck.isEmpty()){
+                   popupGameWinMessage(game.getPlayer1().getName());
 
                    db.collection(Utils.DB_GAME)
                            .document(value.getId())
-                           .update("winner", "player1"
+                           .update("winner", game.getPlayer1().getName()
                                    ,"status", "finished"
                            );
 
-               }else if(player2Deck.isEmpty()){
+               }else if(game.getPlayer2Deck().isEmpty()){
+
+                   popupGameWinMessage(game.getPlayer2().getName());
 
                    db.collection(Utils.DB_GAME)
                            .document(value.getId())
-                           .update("winner", "player2"
+                           .update("winner", game.getPlayer2().getName()
                                    ,"status", "finished"
                            );
                } else{
@@ -259,14 +256,14 @@ public class GameRoomFragment extends Fragment {
                         if non of the players deck is empty
                      */
 
-                   String player;
-                   String playerType;
+                   String currentPlayerDeck;
+                   String currentPlayer;
                    if(currentUser.getId().equals(game.getPlayer1().getId())) {
-                       player = "player1Deck";
-                       playerType = "player1";
+                       currentPlayerDeck = "player1Deck";
+                       currentPlayer = "player1";
                    } else {
-                       player = "player2Deck";
-                       playerType = "player2";
+                       currentPlayerDeck = "player2Deck";
+                       currentPlayer = "player2";
                    }
 
 //
@@ -280,32 +277,33 @@ public class GameRoomFragment extends Fragment {
 
                    ArrayList<String> tableDeck = (ArrayList<String>) documentMap.get("tableDeck");
 
-                   ArrayList<String> playerDeck = (ArrayList<String>) documentMap.get(player);
+                   ArrayList<String> playerDeck = (ArrayList<String>) documentMap.get(currentPlayerDeck);
 
 
 
                    String topCard = documentMap.get("topCard").toString();
                    String[] arr = topCard.split(""); //arr first element is card color and second is card faceValue
 
-                   String topcard_color = arr[0];
-
                    int color = Color.WHITE;
-                   if(topcard_color.equals("B"))
+                   if(arr[0].equals("B"))
                        color = Color.BLUE;
-                   else if(topcard_color.equals("G"))
+                   else if(arr[0].equals("G"))
                        color = Color.GREEN;
-                   else if(topcard_color.equals("Y"))
+                   else if(arr[0].equals("Y"))
                        color = Color.YELLOW;
-                   else if(topcard_color.equals("R"))
+                   else if(arr[0].equals("R"))
                        color = Color.RED;
-                   else if(topcard_color.equals("W"))
+                   else if(arr[0].equals("W"))
+                   {
+                       color = Color.BLACK;
                        arr[1] = arr[1]+arr[2];  //for wild cards
+                   }
 
                    binding.cardPlayed.setCardBackgroundColor(color);
                    binding.topCard.setText(arr[1]);
 
                    binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                   binding.recyclerView.setAdapter(new RecyclerViewAdapter(playerDeck, value.getId(), player, topCard, playerType, tableDeck ));
+                   binding.recyclerView.setAdapter(new RecyclerViewAdapter(playerDeck, value.getId(), currentPlayerDeck, topCard, currentPlayer, tableDeck ));
 
 
                }
@@ -316,12 +314,14 @@ public class GameRoomFragment extends Fragment {
 
     }
 
+    public void popupGameWinMessage(String name){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        alertDialogBuilder.setTitle("WINNER")
+                          .setMessage(name + " is the winner !!!!")
+                            .setIcon(R.drawable.ic_baseline_auto_awesome_24);
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(GameRoomViewModel.class);
-        // TODO: Use the ViewModel
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     public interface IGameRoomScreen {

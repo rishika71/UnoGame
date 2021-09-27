@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.example.unogame.databinding.LayoutCardslistBinding;
 import com.example.unogame.databinding.UsersLayoutBinding;
-import com.example.unogame.models.Card;
 import com.example.unogame.models.Player;
 import com.example.unogame.models.User;
 import com.example.unogame.models.Utils;
@@ -42,19 +41,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     String documentId;
     String player;
     String topCard;
-    String playerType;
+    String currentPlayer;
     ArrayList<String> tableDeck;
+    String nextPlayerTurn;
 
     final private String TAG = "demo";
 
     ListenerRegistration lr;
 
-    public RecyclerViewAdapter(ArrayList<String> cardsList, String documentId, String player, String topCard, String playerType, ArrayList<String> tableDeck) {
+    public RecyclerViewAdapter(ArrayList<String> cardsList, String documentId, String player, String topCard, String currentPlayer, ArrayList<String> tableDeck) {
         this.cardsList = cardsList;
         this.documentId = documentId;
         this.player = player;
         this.topCard = topCard;
-        this.playerType = playerType;
+        this.currentPlayer = currentPlayer;
         this.tableDeck = tableDeck;
     }
 
@@ -91,7 +91,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             cardColor = Color.YELLOW;
         else if(color.equals("R"))
             cardColor = Color.RED;
-
+        else if(color.equals("W"))
+            cardColor = Color.BLACK;
 
         holder.binding.playerCard.setCardBackgroundColor(cardColor);
         if(color.equals("W"))
@@ -110,75 +111,39 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
               String topCardColor = topCardArr[0];
               String topCardFaceValue = topCardArr[1];
 
-              if(card.equals("Wd4")){
-
-
-                  //pop up with color and set that color;
-
-                  AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-                  builder.setTitle("Choose color");
-
-                  String[] colorList = {"RED", "GREEN", "BLUE", "YELLOW"};
-                  builder.setItems(colorList, new DialogInterface.OnClickListener() {
-                      @Override
-                      public void onClick(DialogInterface dialog, int which) {
-
-                          switch (which) {
-                              case 0: topCard = "Rd4"; //RED
-                              case 1: topCard = "Gd4"; // GREEN
-                              case 2: topCard = "Bd4"; // BLUE
-                              case 3: topCard = "Yd4"; // YELLOW
-                          }
-                          db.collection(Utils.DB_GAME)
-                                  .document(documentId)
-                                  .update("topCard", topCard);
-
-                      }
-                  });
-
-                  AlertDialog dialog = builder.create();
-                  dialog.show();
-
-                  String type;
-
-                  ArrayList<String> otherPlayerDeck = new ArrayList<>();
-                  for(int k = 0; k<4 ;k++) {
-                      otherPlayerDeck.add(tableDeck.get(k));
-                      tableDeck.remove(k);
-                  }
-
-                  if(playerType.equals("player1")) {
-                      playerType = "player1";
-                      type = "player2Deck";
-                  }
-                  else {
-                      playerType = "player2";
-                      type = "player1Deck";
-                  }
-
-                   for(int i = 0; i<otherPlayerDeck.size(); i++){
-
-                      db.collection(Utils.DB_GAME)
-                              .document(documentId)
-                              .update(type, FieldValue.arrayUnion(otherPlayerDeck.get(i))
-                              );
-                  }
-
-                  db.collection(Utils.DB_GAME)
-                          .document(documentId)
-                          .update("usedCards", FieldValue.arrayUnion(card)
-                                  ,player, FieldValue.arrayRemove(card)
-                                  , "turn", playerType
-                                  ,"tableDeck", tableDeck
-                          );
-
-              }else if(color.equals(topCardColor) || facevalue.equals(topCardFaceValue)){
+              if(color.equals(topCardColor) || facevalue.equals(topCardFaceValue)){
 
                   topCard = card;
 
-                  if(facevalue.equals("d") || facevalue.equals("S"))  //Turn will be skipped on d4 or skip card
+                  if(facevalue.equals("+") || facevalue.equals("S"))  //Turn will be skipped on +4 or skip card
                   {
                       if(facevalue.equals("d")){
+
+                          //pop up with color and set that color;
+
+                          AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                          builder.setTitle("Choose color");
+
+                          String[] colorList = {"RED", "GREEN", "BLUE", "YELLOW"};
+                          builder.setItems(colorList, new DialogInterface.OnClickListener() {
+                              @Override
+                              public void onClick(DialogInterface dialog, int which) {
+
+                                  switch (which) {
+                                      case 0: topCard = "R+4"; //RED
+                                      case 1: topCard = "G+4"; // GREEN
+                                      case 2: topCard = "B+4"; // BLUE
+                                      case 3: topCard = "Y+4"; // YELLOW
+                                  }
+                                  db.collection(Utils.DB_GAME)
+                                          .document(documentId)
+                                          .update("topCard", topCard);
+
+                              }
+                          });
+                          AlertDialog dialog = builder.create();
+                          dialog.show();
+
 
                           String type;
 
@@ -188,7 +153,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                               tableDeck.remove(k);
                           }
 
-                          if(playerType.equals("player1"))
+                          if(currentPlayer.equals("player1"))
                               type = "player2Deck";
                           else
                               type = "player1Deck";
@@ -203,16 +168,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
                       }
 
-                      if(playerType.equals("player1"))
-                          playerType = "player1";
-                      else
-                          playerType = "player2";
                   }else{
 
-                      if(playerType.equals("player1"))
-                          playerType = "player2";
+                      if(currentPlayer.equals("player1"))
+                          nextPlayerTurn = "player2";
                       else
-                          playerType = "player1";
+                          nextPlayerTurn = "player1";
                   }
 
 
@@ -222,7 +183,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                           .update(  "topCard", topCard
                                   ,"usedCards", FieldValue.arrayUnion(card)
                                   ,player, FieldValue.arrayRemove(card)
-                                  , "turn", playerType
+                                  , "turn", nextPlayerTurn
                                   ,"tableDeck", tableDeck
 
                           );

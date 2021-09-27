@@ -33,6 +33,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,8 +46,6 @@ public class GameScreenFragment extends Fragment {
     private FragmentGameScreenBinding binding;
 
     IGameScreen mGameScreen;
-
-    private FirebaseAuth mAuth;
 
     final private String TAG = "demo";
 
@@ -89,6 +89,35 @@ public class GameScreenFragment extends Fragment {
         View view = binding.getRoot();
 
         navController = Navigation.findNavController(getActivity(), R.id.fragmentContainerView2);
+
+
+        binding.nameId.setText(currentUser.getFirstname().toUpperCase() + " " + currentUser.getLastname().toUpperCase());
+
+
+        if (currentUser.getPhotoref() != null) {
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(currentUser.getId()).child(currentUser.getPhotoref());
+            GlideApp.with(view)
+                    .load(storageReference)
+                    .into(binding.userImageId);
+        } else {
+            GlideApp.with(view)
+                    .load(R.drawable.profile_image)
+                    .into(binding.userImageId);
+        }
+
+        binding.nameId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navController.navigate(R.id.action_gameScreenFragment_to_userProfileFragment);
+            }
+        });
+
+        binding.userImageId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navController.navigate(R.id.action_gameScreenFragment_to_userProfileFragment);
+            }
+        });
 
         binding.startGameButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -218,15 +247,12 @@ public class GameScreenFragment extends Fragment {
                         if(progressBarFlag)
                             p.hide();
 
+                        Toast.makeText(getContext(), "Another player has joined the game", Toast.LENGTH_LONG).show();
                         Bundle bundle = new Bundle();
                         bundle.putString("gameId", doc.getId());
                         bundle.putSerializable("game", game);
                         navController.navigate(R.id.action_gameScreenFragment_to_gameRoomFragment, bundle);
                         lr.remove();
-
-                    }else if(game.getStatus().equals("finished")){
-
-                        // show game screen with start game button
 
                     }
 
@@ -244,7 +270,7 @@ public class GameScreenFragment extends Fragment {
     public ArrayList<String> getShuffledDeck(){
         ArrayList<String> cardList = new ArrayList<>();
         String cardColor[] = {"B", "G","R", "Y", "W" };
-        String cardFaceValue[] = {"0", "1","2", "3", "4", "5", "6", "7","8","9","S","D4" };
+        String cardFaceValue[] = {"0", "1","2", "3", "4", "5", "6", "7","8","9","S","+4" };
 
         /* Add all the cards except draw four cards*/
 
@@ -253,9 +279,9 @@ public class GameScreenFragment extends Fragment {
                 cardList.add(cardColor[i]+cardFaceValue[j]);
             }
         }
-        /*Add draw 4 cards to the deck */
+        /*Add wild draw 4 cards to the deck */
         for(int i = 0; i<4; i++){
-            cardList.add("Wd4");
+            cardList.add("W+4");
         }
 
         ArrayList<String> shuffledDeck = shuffleDeck(cardList);
@@ -272,9 +298,7 @@ public class GameScreenFragment extends Fragment {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_profile:
-                navController.navigate(R.id.action_gameScreenFragment_to_userProfileFragment);
-                return true;
+         
             case R.id.action_friends:
                 navController.navigate(R.id.action_gameScreenFragment_to_usersFragment);
                 return true;
