@@ -94,6 +94,7 @@
 
     <ImageView
         android:id="@+id/deck"
+        android:clickable="true"
         android:layout_width="100dp"
         android:layout_height="110dp"
         android:layout_marginStart="6dp"
