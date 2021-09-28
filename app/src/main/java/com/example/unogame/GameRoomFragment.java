@@ -360,6 +360,10 @@ public class GameRoomFragment extends Fragment {
                     /*
                         if non of the players deck is empty
                      */
+                   if(player1Deck.size() == 1)
+                       Toast.makeText(getContext(), game.getPlayer1().getName()+" shouts UNO ", Toast.LENGTH_SHORT).show();
+                   else if(player2Deck.size() == 1)
+                       Toast.makeText(getContext(), game.getPlayer2().getName()+" shouts UNO ", Toast.LENGTH_SHORT).show();
 
                    String currentPlayerDeck;
                    String currentPlayer;
@@ -383,14 +387,18 @@ public class GameRoomFragment extends Fragment {
                        binding.player2TexViewId.setTextColor(getResources().getColor(R.color.blue));
                    }
 
-//
-//                   /* To disable/enable layout on the basis of turn */
-//                   if( playerType.equals(documentMap.get("turn"))){
-//                       getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-//                   }else
-//                   {
-//                       getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-//                   }
+
+                   /* To disable/enable layout on the basis of turn */
+                   if( currentPlayer.equals(documentMap.get("turn"))){
+                       binding.deck.setEnabled(true);
+                       binding.skipTurn.setEnabled(true);
+                       //getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                   }else
+                   {
+                       binding.deck.setEnabled(false);
+                       binding.skipTurn.setEnabled(false);
+                       //getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                   }
 
                    ArrayList<String> tableDeck = (ArrayList<String>) documentMap.get("tableDeck");
 
@@ -401,6 +409,11 @@ public class GameRoomFragment extends Fragment {
                    String[] arr = topCard.split(""); //arr first element is card color and second is card faceValue
 
                    int color = Color.WHITE;
+
+                   if(topCard.equals("B+4") || topCard.equals("G+4") || topCard.equals("R+4") || topCard.equals("Y+4") ){
+                       arr[1] = arr[1]+arr[2];  //for wild cards
+                   }
+
                    if(arr[0].equals("B"))
                        color = getResources().getColor(R.color.blue);
                    else if(arr[0].equals("G"))
@@ -414,6 +427,7 @@ public class GameRoomFragment extends Fragment {
                        color = Color.BLACK;
                        arr[1] = arr[1]+arr[2];  //for wild cards
                    }
+
 
                    //binding.cardPlayed.setCardBackgroundColor(color);
                    binding.cardPlayed.setStrokeColor(color);

@@ -45,6 +45,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     ArrayList<String> tableDeck;
     String nextPlayerTurn;
 
+
     final private String TAG = "demo";
 
     ListenerRegistration lr;

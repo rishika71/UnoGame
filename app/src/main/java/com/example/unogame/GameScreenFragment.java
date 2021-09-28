@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -177,16 +179,22 @@ public class GameScreenFragment extends Fragment {
                                 p.setCancelable(false);
                                 p.show();
 
-                                /*
-                                 Runnable progressRunnable = new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        p.cancel();
-                                    }
-                                };
-                                Handler pdCanceller = new Handler();
-                                pdCanceller.postDelayed(progressRunnable, 10000); //for 10 secs
-                                 */
+//                                Runnable progressRunnable = new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        p.cancel();
+//                                        db.collection(Utils.DB_GAME).document(doc.getId())
+//                                                .delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                            @Override
+//                                            public void onComplete(@NonNull Task<Void> task) {
+//                                                Log.d(TAG, "DocumentSnapshot successfully deleted!");
+//                                            }
+//                                        });
+//                                    }
+//                                };
+//
+//                                Handler pdCanceller = new Handler();
+//                                pdCanceller.postDelayed(progressRunnable, 10000); //for 10 secs
 
                             }
                             else{
@@ -201,8 +209,10 @@ public class GameScreenFragment extends Fragment {
 
                                                 ArrayList<String> shuffledDeck = getShuffledDeck();
 
-                                                String topCard = shuffledDeck.get(0);
-                                                shuffledDeck.remove(0);
+//                                                String topCard = shuffledDeck.get(0);
+//                                                shuffledDeck.remove(0);
+                                                String topCard = getTopCard(shuffledDeck);
+                                                shuffledDeck.remove(topCard);
 
                                                 ArrayList<String> player1Deck = new ArrayList<>();
                                                 for(int j = 0; j<7 ;j++){
@@ -287,6 +297,24 @@ public class GameScreenFragment extends Fragment {
         ArrayList<String> shuffledDeck = shuffleDeck(cardList);
         return shuffledDeck;
        }
+
+       /* Get the top Card (any card except skip and wild card )*/
+
+    public String getTopCard(ArrayList<String> shuffledDeck){
+        String topCard = shuffledDeck.get(0);
+        for(int i = 0; i<shuffledDeck.size(); i++){
+            topCard = shuffledDeck.get(i);
+            String[] arr = topCard.split("");
+            if(arr[1].equals("S") || arr[1].equals("+")){
+
+            }
+            else{
+                break;
+            }
+        }
+
+        return topCard;
+    }
 
 
     /*Shuffle the deck */
