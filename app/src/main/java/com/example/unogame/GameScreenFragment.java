@@ -281,7 +281,7 @@ public class GameScreenFragment extends Fragment {
         }
         /*Add wild draw 4 cards to the deck */
         for(int i = 0; i<4; i++){
-            cardList.add("W+4");
+            cardList.add("W+4"+i);
         }
 
         ArrayList<String> shuffledDeck = shuffleDeck(cardList);

@@ -84,21 +84,28 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         int cardColor = Color.WHITE;
         if(color.equals("B"))
-            cardColor = Color.BLUE;
+            cardColor = holder.itemView.getResources().getColor(R.color.blue);
         else if(color.equals("G"))
-            cardColor = Color.GREEN;
+            cardColor = holder.itemView.getResources().getColor(R.color.green);
         else if(color.equals("Y"))
-            cardColor = Color.YELLOW;
+            cardColor = holder.itemView.getResources().getColor(R.color.yellow);
         else if(color.equals("R"))
-            cardColor = Color.RED;
+            cardColor = holder.itemView.getResources().getColor(R.color.red);
         else if(color.equals("W"))
             cardColor = Color.BLACK;
 
-        holder.binding.playerCard.setCardBackgroundColor(cardColor);
-        if(color.equals("W"))
+        //holder.binding.playerCard.setCardBackgroundColor(cardColor);
+        holder.binding.playerCard.setStrokeColor(cardColor);
+        if(color.equals("W") || facevalue.equals("+"))
+        {
             holder.binding.textviewId.setText(arr[1] + arr[2]);  //for wild card draw4
-        else
+        }
+        else{
             holder.binding.textviewId.setText(facevalue);
+
+        }
+        holder.binding.textviewId.setTextColor(cardColor);
+
 
       holder.binding.playerCard.setOnClickListener(new View.OnClickListener() {
           @Override
@@ -111,13 +118,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
               String topCardColor = topCardArr[0];
               String topCardFaceValue = topCardArr[1];
 
-              if(color.equals(topCardColor) || facevalue.equals(topCardFaceValue)){
+              if(color.equals(topCardColor) || facevalue.equals(topCardFaceValue) || color.equals("W")){
 
                   topCard = card;
 
-                  if(facevalue.equals("+") || facevalue.equals("S"))  //Turn will be skipped on +4 or skip card
+                  if(facevalue.equals("+") || facevalue.equals("S")  )  //Turn will be skipped on +4 or skip card
                   {
-                      if(facevalue.equals("d")){
+                      if(facevalue.equals("+")){
 
                           //pop up with color and set that color;
 
@@ -128,16 +135,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                           builder.setItems(colorList, new DialogInterface.OnClickListener() {
                               @Override
                               public void onClick(DialogInterface dialog, int which) {
+                                  String wildCard = card;
 
                                   switch (which) {
-                                      case 0: topCard = "R+4"; //RED
-                                      case 1: topCard = "G+4"; // GREEN
-                                      case 2: topCard = "B+4"; // BLUE
-                                      case 3: topCard = "Y+4"; // YELLOW
+                                      case 0:
+                                          wildCard = "R+4";//RED
+                                          break;
+                                      case 1: wildCard = "G+4"; // GREEN
+                                                break;
+                                      case 2: wildCard = "B+4"; // BLUE
+                                                break;
+                                      case 3: wildCard = "Y+4"; // YELLOW
+                                                break;
                                   }
                                   db.collection(Utils.DB_GAME)
                                           .document(documentId)
-                                          .update("topCard", topCard);
+                                          .update("topCard", wildCard);
 
                               }
                           });
@@ -167,6 +180,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                           }
 
                       }
+
+                      if(currentPlayer.equals("player1"))
+                          nextPlayerTurn = "player1";
+                      else
+                          nextPlayerTurn = "player2";
+
 
                   }else{
 

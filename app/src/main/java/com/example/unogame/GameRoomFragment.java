@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -28,6 +29,7 @@ import com.example.unogame.models.User;
 import com.example.unogame.models.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -102,6 +104,7 @@ public class GameRoomFragment extends Fragment {
         binding.player1TexViewId.setText(game.getPlayer1().getName());
         binding.player2TexViewId.setText(game.getPlayer2().getName());
 
+
         if (game.getPlayer1().getPhotoref() != null) {
             StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(game.getPlayer1().getId()).child(game.getPlayer1().getPhotoref());
             GlideApp.with(view)
@@ -125,13 +128,53 @@ public class GameRoomFragment extends Fragment {
         }
 
 
-
         binding.deck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Toast.makeText(getContext(),"A new card has been picked from the deck", Toast.LENGTH_SHORT).show();
                 pickCardFromDeck();
+            }
+        });
+
+        binding.skipTurn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSkipTurn();
+            }
+        });
+
+        binding.exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new MaterialAlertDialogBuilder(getContext())
+                        .setTitle("EXIT")
+                        .setMessage("Do you want to quit?")
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                String winner;
+                                if(currentUser.getId().equals(game.getPlayer1().getId()))
+                                    winner = game.getPlayer2().getName();
+                                else
+                                    winner = game.getPlayer1().getName();
+
+
+                                Toast.makeText(getContext(),"You Lost the match!!!", Toast.LENGTH_LONG).show();
+                                db.collection(Utils.DB_GAME)
+                                        .document(gameDocumentId)
+                                        .update("status", "finished"
+                                                ,"winner", winner
+                                        );
+
+                                dialogInterface.dismiss();
+
+                            }
+                        })
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        }).show();
             }
         });
 
@@ -140,7 +183,32 @@ public class GameRoomFragment extends Fragment {
         return view;
     }
 
+    public void onSkipTurn(){
+        CollectionReference ddb = db.collection(Utils.DB_GAME);
+        ddb.document(gameDocumentId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Map<String, Object> documentMap = task.getResult().getData();
+                String documentId = task.getResult().getId();
+
+                if(documentMap.get("turn").toString().equals("player1")){
+                    db.collection(Utils.DB_GAME)
+                            .document(documentId)
+                            .update("turn", "player2"
+                            );
+                }else{
+                    db.collection(Utils.DB_GAME)
+                            .document(documentId)
+                            .update("turn", "player1"
+                            );
+                }
+
+            }
+        });
+    }
+
     public void pickCardFromDeck(){
+        Toast.makeText(getContext(),"A new card has been picked from the deck", Toast.LENGTH_SHORT).show();
         CollectionReference ddb = db.collection(Utils.DB_GAME);
         ddb.document(gameDocumentId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -214,8 +282,8 @@ public class GameRoomFragment extends Fragment {
                                     .document(documentId)
                                     .update("topCard", pickedCard
                                             ,"turn", nextPlayerTurn
-                                            , "tableDeck", FieldValue.arrayRemove(topCard)
-                                            ,"usedCards", FieldValue.arrayUnion(topCard)
+                                            , "tableDeck", FieldValue.arrayRemove(pickedCard)
+                                            ,"usedCards", FieldValue.arrayUnion(pickedCard)
                                     );
 
                         }else{
@@ -224,7 +292,7 @@ public class GameRoomFragment extends Fragment {
                             db.collection(Utils.DB_GAME)
                                     .document(documentId)
                                     .update("turn", nextPlayerTurn
-                                            , "tableDeck", FieldValue.arrayRemove(topCard)
+                                            , "tableDeck", FieldValue.arrayRemove(pickedCard)
                                             ,playerDeck, FieldValue.arrayUnion(pickedCard)
                                     );
 
@@ -258,9 +326,16 @@ public class GameRoomFragment extends Fragment {
                     navController.navigate(R.id.action_gameRoomFragment_to_gameScreenFragment);
                 }
 
-               if(game.getPlayer1Deck().isEmpty()){
+               ArrayList<String> player1Deck = (ArrayList<String>)documentMap.get("player1Deck");
+                ArrayList<String> player2Deck = (ArrayList<String>)documentMap.get("player2Deck");
 
-                   popupGameWinMessage(game.getPlayer1().getName());
+
+               if(player1Deck.isEmpty()){
+
+                   if(currentUser.getId().equals(game.getPlayer1().getId()))
+                       popupGameWinMessage();
+                   else
+                       popupGameLostMessage();
 
                    db.collection(Utils.DB_GAME)
                            .document(value.getId())
@@ -268,9 +343,13 @@ public class GameRoomFragment extends Fragment {
                                    ,"status", "finished"
                            );
 
-               }else if(game.getPlayer2Deck().isEmpty()){
+               }else if(player2Deck.isEmpty()){
 
-                   popupGameWinMessage(game.getPlayer2().getName());
+                   if(currentUser.getId().equals(game.getPlayer2().getId()))
+                       popupGameWinMessage();
+                   else
+                       popupGameLostMessage();
+
 
                    db.collection(Utils.DB_GAME)
                            .document(value.getId())
@@ -292,6 +371,18 @@ public class GameRoomFragment extends Fragment {
                        currentPlayer = "player2";
                    }
 
+                   if(documentMap.get("turn").toString().equals("player1")){
+                       binding.player1TexViewId.setTextColor(Color.RED);
+                   }else{
+                       binding.player1TexViewId.setTextColor(getResources().getColor(R.color.blue));
+                   }
+
+                   if(documentMap.get("turn").toString().equals("player2")){
+                       binding.player2TexViewId.setTextColor(Color.RED);
+                   }else{
+                       binding.player2TexViewId.setTextColor(getResources().getColor(R.color.blue));
+                   }
+
 //
 //                   /* To disable/enable layout on the basis of turn */
 //                   if( playerType.equals(documentMap.get("turn"))){
@@ -306,27 +397,28 @@ public class GameRoomFragment extends Fragment {
                    ArrayList<String> playerDeck = (ArrayList<String>) documentMap.get(currentPlayerDeck);
 
 
-
                    String topCard = documentMap.get("topCard").toString();
                    String[] arr = topCard.split(""); //arr first element is card color and second is card faceValue
 
                    int color = Color.WHITE;
                    if(arr[0].equals("B"))
-                       color = Color.BLUE;
+                       color = getResources().getColor(R.color.blue);
                    else if(arr[0].equals("G"))
-                       color = Color.GREEN;
+                       color = getResources().getColor(R.color.green);
                    else if(arr[0].equals("Y"))
-                       color = Color.YELLOW;
+                       color = getResources().getColor(R.color.yellow);
                    else if(arr[0].equals("R"))
-                       color = Color.RED;
+                       color = getResources().getColor(R.color.red);
                    else if(arr[0].equals("W"))
                    {
                        color = Color.BLACK;
                        arr[1] = arr[1]+arr[2];  //for wild cards
                    }
 
-                   binding.cardPlayed.setCardBackgroundColor(color);
+                   //binding.cardPlayed.setCardBackgroundColor(color);
+                   binding.cardPlayed.setStrokeColor(color);
                    binding.topCard.setText(arr[1]);
+                   binding.topCard.setTextColor(color);
 
                    binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
                    binding.recyclerView.setAdapter(new RecyclerViewAdapter(playerDeck, value.getId(), currentPlayerDeck, topCard, currentPlayer, tableDeck ));
@@ -340,13 +432,25 @@ public class GameRoomFragment extends Fragment {
 
     }
 
-    public void popupGameWinMessage(String name){
+    public void popupGameWinMessage(){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
         alertDialogBuilder.setTitle("WINNER")
-                          .setMessage(name + " is the winner !!!!")
+                          .setMessage("You won the game !!!!")
                             .setIcon(R.drawable.ic_baseline_auto_awesome_24);
 
         AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setCanceledOnTouchOutside(true);
+        alertDialog.show();
+    }
+
+    public void popupGameLostMessage(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        alertDialogBuilder.setTitle("SORRY")
+                .setMessage("You Lost the game !!!!")
+                .setIcon(R.drawable.sad);
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setCanceledOnTouchOutside(true);
         alertDialog.show();
     }
 

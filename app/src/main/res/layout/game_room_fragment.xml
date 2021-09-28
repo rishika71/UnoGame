@@ -29,9 +29,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
-        android:text="player 1 "
         android:fontFamily="sans-serif-medium"
-        android:textSize="14sp"
+        android:text="player 1 "
+        android:textColor="@color/blue"
+        android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@+id/player1Image"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,7 +40,7 @@
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:text="vs"
         app:layout_constraintStart_toEndOf="@+id/player1TexViewId"
@@ -50,11 +51,12 @@
         android:id="@+id/player2TexViewId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
-        android:text="player2"
         android:fontFamily="sans-serif-medium"
-        android:textSize="14sp"
+        android:text="player2"
+        android:textColor="@color/blue"
+        android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@+id/textView6"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -93,24 +95,43 @@
         app:layout_constraintTop_toBottomOf="@+id/player1Image"
         tools:ignore="SpeakableTextPresentCheck" />
 
-    <androidx.cardview.widget.CardView
+
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardPlayed"
         android:layout_width="80dp"
         android:layout_height="107dp"
         android:layout_marginTop="150dp"
-        app:cardBackgroundColor="@color/purple_200"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:strokeWidth="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.563"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView6">
-
-        <TextView
-            android:id="@+id/topCard"
+        <RelativeLayout
+            android:id="@+id/imageRelativeLayoutId"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp" />
+            android:layout_height="match_parent"
+            >
 
-    </androidx.cardview.widget.CardView>
+            <TextView
+                android:id="@+id/topCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="19dp"
+                android:layout_marginBottom="30dp"
+                android:gravity="center_horizontal"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textSize="30sp" />
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/skipTurn"
@@ -141,5 +162,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/recyclerView"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Rounded" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
