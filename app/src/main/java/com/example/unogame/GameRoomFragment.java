@@ -147,7 +147,7 @@ public class GameRoomFragment extends Fragment {
             public void onClick(View view) {
                 new MaterialAlertDialogBuilder(getContext())
                         .setTitle("EXIT")
-                        .setMessage("Do you want to quit?")
+                        .setMessage("Do you want to quit? You will lose the game")
                         .setPositiveButton("YES", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {

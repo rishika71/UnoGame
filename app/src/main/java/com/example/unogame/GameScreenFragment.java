@@ -92,7 +92,6 @@ public class GameScreenFragment extends Fragment {
 
         navController = Navigation.findNavController(getActivity(), R.id.fragmentContainerView2);
 
-
         binding.nameId.setText(currentUser.getFirstname().toUpperCase() + " " + currentUser.getLastname().toUpperCase());
 
 
@@ -178,23 +177,16 @@ public class GameScreenFragment extends Fragment {
                                 p.setIndeterminate(false);
                                 p.setCancelable(false);
                                 p.show();
-
-//                                Runnable progressRunnable = new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        p.cancel();
-//                                        db.collection(Utils.DB_GAME).document(doc.getId())
-//                                                .delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                            @Override
-//                                            public void onComplete(@NonNull Task<Void> task) {
-//                                                Log.d(TAG, "DocumentSnapshot successfully deleted!");
-//                                            }
-//                                        });
-//                                    }
-//                                };
-//
-//                                Handler pdCanceller = new Handler();
-//                                pdCanceller.postDelayed(progressRunnable, 10000); //for 10 secs
+                                /*
+                                   Runnable progressRunnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        p.cancel();
+                                    }
+                                };
+                                Handler pdCanceller = new Handler();
+                                pdCanceller.postDelayed(progressRunnable, 10000); //for 10 secs
+                                 */
 
                             }
                             else{
@@ -245,6 +237,7 @@ public class GameScreenFragment extends Fragment {
                                         .setNegativeButton("Decline", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
+
                                                 dialogInterface.dismiss();
                                             }
                                         })
@@ -262,7 +255,7 @@ public class GameScreenFragment extends Fragment {
                         bundle.putString("gameId", doc.getId());
                         bundle.putSerializable("game", game);
                         navController.navigate(R.id.action_gameScreenFragment_to_gameRoomFragment, bundle);
-                        lr.remove();
+
 
                     }
 
@@ -273,6 +266,7 @@ public class GameScreenFragment extends Fragment {
         });
 
     }
+
 
     /*
     ON game start, set the table deck, player cards, top card
@@ -352,6 +346,16 @@ public class GameScreenFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (lr != null) {
+            lr.remove();
+        }
+    }
+
+
 
     public interface IGameScreen {
         User getUser();
