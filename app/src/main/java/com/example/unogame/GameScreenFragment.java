@@ -177,16 +177,16 @@ public class GameScreenFragment extends Fragment {
                                 p.setIndeterminate(false);
                                 p.setCancelable(false);
                                 p.show();
-                                /*
+
+                                Handler pdCanceller = new Handler();
                                    Runnable progressRunnable = new Runnable() {
                                     @Override
                                     public void run() {
                                         p.cancel();
                                     }
                                 };
-                                Handler pdCanceller = new Handler();
-                                pdCanceller.postDelayed(progressRunnable, 10000); //for 10 secs
-                                 */
+                                pdCanceller.postDelayed(progressRunnable, 10000);//for 10 secs
+
 
                             }
                             else{
@@ -237,7 +237,13 @@ public class GameScreenFragment extends Fragment {
                                         .setNegativeButton("Decline", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
+                                                db.collection(Utils.DB_GAME).document(doc.getId())
+                                                        .delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
 
+                                                    }
+                                                });
                                                 dialogInterface.dismiss();
                                             }
                                         })
